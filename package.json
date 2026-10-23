@@ -1,0 +1,91 @@
+{
+  "name": "claude-team-sync",
+  "displayName": "Claude Team Sync",
+  "description": "Share Claude Code session handoffs across the team via a git-hosted CSV and feed them back into Claude's context.",
+  "version": "0.1.1",
+  "publisher": "AyuSharma-dev",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.claude",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "teamSync.setup",
+        "title": "Team Sync: Set Up This Project"
+      },
+      {
+        "command": "teamSync.sync",
+        "title": "Team Sync: Sync Now",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "teamSync.pull",
+        "title": "Team Sync: Pull Team Context Only"
+      },
+      {
+        "command": "teamSync.openContext",
+        "title": "Team Sync: Open Team Context"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Team Sync",
+      "properties": {
+        "teamSync.repoUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Git URL of this project's team-sync repo. Commit it in .vscode/settings.json so the team shares it."
+        },
+        "teamSync.branch": {
+          "type": "string",
+          "default": "main",
+          "description": "Branch of the team-sync repo to sync with."
+        },
+        "teamSync.file": {
+          "type": "string",
+          "default": "team-context.csv",
+          "description": "CSV file path inside the team-sync repo."
+        },
+        "teamSync.authorName": {
+          "type": "string",
+          "default": "",
+          "description": "Your name as shown in handoffs. Defaults to git user.name."
+        },
+        "teamSync.maxEntries": {
+          "type": "number",
+          "default": 50,
+          "description": "Max handoffs written into team-context.md (newest first)."
+        },
+        "teamSync.autoPullOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Pull team context when VS Code opens."
+        },
+        "teamSync.claudePath": {
+          "type": "string",
+          "default": "claude",
+          "description": "Path to the Claude Code CLI."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "typescript": "^5.4.0"
+  }
+}
