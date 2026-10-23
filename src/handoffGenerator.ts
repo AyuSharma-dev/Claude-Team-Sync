@@ -54,6 +54,11 @@ export function generateHandoff(claudePath: string, session: PendingSession): Pr
     child.on('close', code => {
       clearTimeout(timer);
       if (code !== 0) {
+        // Empty chats have no saved conversation to resume; nothing to summarize, so drop them.
+        if (/No conversation found with session ID/i.test(stderr + stdout)) {
+          resolve({ skip: true });
+          return;
+        }
         reject(new Error(`claude exited with code ${code}: ${(stderr || stdout).trim().slice(0, 500)}`));
         return;
       }
