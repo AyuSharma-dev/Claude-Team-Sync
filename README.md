@@ -6,7 +6,7 @@ Shares what each developer did in Claude Code with the rest of the team, and fee
 Claude session ends ─► SessionEnd hook records session id ─► .claude/team-sync/pending.jsonl
 Click "Team Sync" ─► claude -p summarizes each session (forked, read-only) ─► you review/edit
                   ─► rows appended to a CSV in a git repo and pushed ─► everyone's rows pulled
-                  ─► .claude/team-context.md  ◄── imported by CLAUDE.md, so Claude reads it every session
+                  ─► .claude/team-context.md  ◄── CLAUDE.md tells Claude to read it before non-trivial work
 ```
 
 The shared file is `team-context.csv` with the columns `Developer Name, Date, Context`.
@@ -19,7 +19,7 @@ The shared file is `team-context.csv` with the columns `Developer Name, Date, Co
 1. Install the extension.
 2. Open the project and run **Team Sync: Set Up This Project**. This:
    - adds `.claude/hooks/record-session.js` and a `SessionEnd` hook in `.claude/settings.json`
-   - adds an `@.claude/team-context.md` import and a "check team context before solutioning" instruction to `CLAUDE.md`
+   - adds an instruction to `CLAUDE.md` to read `.claude/team-context.md` before solutioning. The file is read on demand, not loaded into every session, to save tokens. Re-running setup updates an older block.
    - gitignores `.claude/team-context.md` and `.claude/team-sync/`
 3. Click **Team Sync** once and enter the repo URL. It is saved to `.vscode/settings.json` (`teamSync.repoUrl`).
 4. Commit `.claude/settings.json`, `.claude/hooks/`, `.vscode/settings.json` and `CLAUDE.md`.
@@ -40,7 +40,7 @@ Nothing is ever merged. Each sync resets its local clone to the latest remote, r
 | `teamSync.branch` | `main` | Branch to sync with |
 | `teamSync.file` | `team-context.csv` | CSV path inside the repo |
 | `teamSync.authorName` | git `user.name` | Name shown on your handoffs |
-| `teamSync.maxEntries` | 50 | Newest handoffs written to the context file (older ones stay in the CSV) |
+| `teamSync.maxEntries` | 15 | Newest handoffs written to the context file (older ones stay in the CSV) |
 | `teamSync.autoPullOnStartup` | true | |
 | `teamSync.claudePath` | `claude` | Path to the Claude Code CLI |
 
