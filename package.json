@@ -61,7 +61,7 @@
         },
         "teamSync.maxEntries": {
           "type": "number",
-          "default": 50,
+          "default": 15,
           "description": "Max handoffs written into team-context.md (newest first)."
         },
         "teamSync.autoPullOnStartup": {
