@@ -18,12 +18,33 @@ const { execSync } = require('child_process');
 // Skip the headless sessions the extension itself runs to generate handoffs.
 if (process.env.TEAM_SYNC_INTERNAL) process.exit(0);
 
+// True if the transcript has at least one message the user actually typed.
+// Slash commands like /exit and system-injected (isMeta) entries don't count.
+function hasUserMessage(transcriptPath) {
+  if (!transcriptPath || !fs.existsSync(transcriptPath)) return false;
+  for (const line of fs.readFileSync(transcriptPath, 'utf8').split('\\n')) {
+    if (!line.trim()) continue;
+    try {
+      const e = JSON.parse(line);
+      if (e.type !== 'user' || e.isMeta || !e.message) continue;
+      const c = e.message.content;
+      const text = typeof c === 'string' ? c
+        : Array.isArray(c) ? c.filter(p => p && p.type === 'text').map(p => p.text).join('') : '';
+      const t = text.trim();
+      if (t && !t.startsWith('<command-') && !t.startsWith('<local-command-')) return true;
+    } catch {}
+  }
+  return false;
+}
+
 let raw = '';
 process.stdin.on('data', c => (raw += c));
 process.stdin.on('end', () => {
   try {
     const input = JSON.parse(raw || '{}');
     if (!input.session_id) return;
+    // Empty chats have nothing to summarize and would sit in the queue forever.
+    if ('transcript_path' in input && !hasUserMessage(input.transcript_path)) return;
     const root = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
     let branch = '';
     try {
