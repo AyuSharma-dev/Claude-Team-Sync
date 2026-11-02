@@ -3,7 +3,7 @@ import * as path from 'path';
 import { CONTEXT_FILE } from './setup';
 import { Row } from './teamFile';
 
-/** Render the newest handoffs into the file CLAUDE.md imports. */
+/** Render the newest handoffs into the file CLAUDE.md points Claude to. */
 export function writeContext(root: string, project: string, rows: Row[], maxEntries: number): string {
   const sorted = [...rows].sort((a, b) => b.date.localeCompare(a.date));
   const shown = sorted.slice(0, maxEntries);
