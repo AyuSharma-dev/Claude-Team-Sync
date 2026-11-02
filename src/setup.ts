@@ -63,8 +63,9 @@ process.stdin.on('end', () => {
 
 const CLAUDE_MD_BLOCK = `${CLAUDE_MD_MARKER}
 ## Team context
-Handoffs from teammates' Claude sessions, synced by the Claude Team Sync extension:
-@${CONTEXT_FILE}
+Handoffs from teammates' Claude sessions, synced by the Claude Team Sync extension, are in \`${CONTEXT_FILE}\`.
+It is not loaded automatically. Read it before proposing a solution or design, or before changing code in an
+area that may have prior work. Skip it for trivial questions and small edits.
 
 Before answering or proposing a solution or design, check the team context above for related prior work,
 decisions and open issues. Follow existing decisions, or say explicitly why you differ.
@@ -108,10 +109,19 @@ export function runSetup(root: string): SetupResult {
     changed.push('.claude/settings.json');
   }
 
-  // 3. CLAUDE.md import + solutioning instruction
+  // 3. CLAUDE.md pointer + solutioning instruction (replaces an older block between the markers)
   const claudeMdPath = path.join(root, 'CLAUDE.md');
   const claudeMd = fs.existsSync(claudeMdPath) ? fs.readFileSync(claudeMdPath, 'utf8') : '';
-  if (!claudeMd.includes(CLAUDE_MD_MARKER)) {
+  const start = claudeMd.indexOf(CLAUDE_MD_MARKER);
+  const end = start < 0 ? -1 : claudeMd.indexOf(CLAUDE_MD_MARKER, start + CLAUDE_MD_MARKER.length);
+  if (end >= 0) {
+    const blockEnd = claudeMd.indexOf('\n', end);
+    const current = claudeMd.slice(start, blockEnd < 0 ? claudeMd.length : blockEnd + 1);
+    if (current.replace(/\r\n/g, '\n') !== CLAUDE_MD_BLOCK) {
+      fs.writeFileSync(claudeMdPath, claudeMd.slice(0, start) + CLAUDE_MD_BLOCK + claudeMd.slice(start + current.length));
+      changed.push('CLAUDE.md');
+    }
+  } else if (start < 0) {
     const sep = claudeMd && !claudeMd.endsWith('\n') ? '\n\n' : claudeMd ? '\n' : '';
     fs.writeFileSync(claudeMdPath, claudeMd + sep + CLAUDE_MD_BLOCK);
     changed.push('CLAUDE.md');
@@ -129,7 +139,7 @@ export function runSetup(root: string): SetupResult {
     changed.push('.gitignore');
   }
 
-  // 5. Context file must exist so the CLAUDE.md import resolves before the first pull
+  // 5. Context file must exist so Claude can read it before the first pull
   fs.mkdirSync(teamSyncDir(root), { recursive: true });
   const contextPath = path.join(root, CONTEXT_FILE);
   if (!fs.existsSync(contextPath)) {
