@@ -157,7 +157,7 @@ async function cmdSync(context: vscode.ExtensionContext, push: boolean, silent =
     }
 
     const rows = await pullRows(repo);
-    const max = vscode.workspace.getConfiguration('teamSync').get<number>('maxEntries') ?? 50;
+    const max = vscode.workspace.getConfiguration('teamSync').get<number>('maxEntries') ?? 15;
     writeContext(root, project, rows, max);
     if (!silent) vscode.window.setStatusBarMessage(`$(check) Team context updated (${rows.length} handoffs)`, 5000);
   } catch (err) {
