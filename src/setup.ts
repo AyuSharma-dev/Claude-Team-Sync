@@ -66,8 +66,11 @@ const CLAUDE_MD_BLOCK = `${CLAUDE_MD_MARKER}
 Handoffs from teammates' Claude sessions, synced by the Claude Team Sync extension:
 @${CONTEXT_FILE}
 
-Before proposing a solution or design, check the team context above for related prior work,
+Before answering or proposing a solution or design, check the team context above for related prior work,
 decisions and open issues. Follow existing decisions, or say explicitly why you differ.
+If a handoff already answers the question or solves the same problem, reuse that answer instead of
+working it out again: say which handoff it comes from (developer and date), then verify it still matches
+the current code. Only investigate further where the code has changed or the handoff does not cover the question.
 ${CLAUDE_MD_MARKER}
 `;
 
