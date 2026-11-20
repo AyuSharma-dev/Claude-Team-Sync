@@ -210,13 +210,22 @@ async function pushPending(root: string, repo: RepoConfig) {
 
   // Trivial sessions never need review; clear them right away.
   removePending(root, skipped);
+  if (skipped.length) {
+    vscode.window.showInformationMessage(
+      `${skipped.length} session(s) had nothing worth sharing (no decisions, findings or open issues) and were cleared without pushing.`
+    );
+  }
   if (!rows.length) return;
 
   const decision = await reviewHandoffs(rows);
   if (decision.action === 'later') return;
   if (decision.action === 'push' && decision.rows.length) {
     const { appended } = await appendRows(repo, decision.rows.map(handoffToRow), author);
-    vscode.window.showInformationMessage(`Shared ${appended} handoff(s) with the team.`);
+    vscode.window.showInformationMessage(
+      appended
+        ? `Shared ${appended} handoff(s) with the team.`
+        : 'Nothing new to push: these handoffs are already in the team repo.'
+    );
   }
   removePending(root, rows.map(r => r.session_id));
 }
